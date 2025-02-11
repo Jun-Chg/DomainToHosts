@@ -3,6 +3,7 @@
 #include <vector>
 #include <winsock2.h> // Windows Sockets API
 #include <ws2tcpip.h> 
+#include <regex>
 #pragma comment(lib, "ws2_32.lib") // Link with ws2_32.lib for Winsock functions
 
 bool canDirectConnect(const std::string& domain, const std::string& port = "80") {
@@ -117,16 +118,29 @@ std::string extractDomain(const std::string& input) {
     return input.substr(start, end - start);
 }
 
+bool isValidURL(const std::string& url) {
+    // 正则表达式匹配常见网址格式
+    std::regex urlPattern(R"(^(?:https?:\/\/)?(?:[a-zA-Z0-9-]+\.)?[a-zA-Z0-9-]+\.[a-zA-Z]{2,}(?:\/[^\s?#]*)?(?:\?[^#]*)?(?:#.*)?$)");
+    return std::regex_match(url, urlPattern);
+}
+
 int main() {
     std::vector<std::string> allOutputs;
     while (true) {
-        std::cout << "请输入网址: ";
+        flag:
+        std::cout << "请输入网址(输入n退出程序): ";
         std::string input;
         std::getline(std::cin, input); // 读取用户输入
-
-        if (input == "exit") { // 增加退出条件
+        if (input == "n") { // 增加退出条件
             break;
         }
+        if (isValidURL(input)) {
+        }
+        else {
+            std::cout << "输入的网址无效。" << std::endl;
+            goto flag;
+        }
+        
 
         std::string domain = extractDomain(input); // 处理输入以获取域名
         resolveDomainToIP(domain, allOutputs); // 使用处理后的域名作为参数调用函数
